@@ -15,7 +15,6 @@ const spot = require("./routes/spot");
 const tide = require("./routes/tide");
 const helmet = require("helmet");
 const compression = require("compression");
-const config = require("config");
 const app = express();
 
 connectDB();
