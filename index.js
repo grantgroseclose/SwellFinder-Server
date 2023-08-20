@@ -4,8 +4,6 @@ const express = require("express");
 dotenv.config({ path: require('find-config')('.env') });
 
 const connectDB = require('./connectDB');
-const SpotModel = require('./models/Spots');
-const UserModel = require('./models/Users');
 
 const users = require("./routes/users");
 const user = require("./routes/user");
@@ -31,7 +29,7 @@ app.use("/api/spot", spot);
 app.use("/api/spots", spots);
 app.use("/api/tide", tide);
 
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 app.listen(port, function() {
   console.log(`Server started on port ${port}...`);
 });
