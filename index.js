@@ -32,7 +32,7 @@ app.use("/api/spot", spot);
 app.use("/api/spots", spots);
 app.use("/api/tide", tide);
 
-const port = config.get("port");
+const port = process.env.PORT;
 app.listen(port, function() {
   console.log(`Server started on port ${port}...`);
 });

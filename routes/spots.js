@@ -6,9 +6,6 @@ const upload = multer({ dest: 'uploads/' });
 
 const validateWith = require("../middleware/validation");
 const auth = require("../middleware/auth");
-const delay = require("../middleware/delay");
-const config = require("config");
-const c = require("config");
 const imageResize = require("../middleware/imageResize");
 const ip = require('ip');
 
