@@ -2,12 +2,17 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 52428800 }
+});
+
+const moment = require("moment");
 
 const validateWith = require("../middleware/validation");
 const auth = require("../middleware/auth");
-const imageResize = require("../middleware/imageResize");
-const ip = require('ip');
+const generateUploadURL = require('../s3');
+const awsClient = require('./aws');
 
 const SpotModel = require('../models/Spots');
 
@@ -17,6 +22,12 @@ const validationSchema = Joi.object({
     latitude: Joi.string().min(5).required(),
     longitude: Joi.string().min(5).required()
 });
+
+const generateRandomFileKey = (currentName) => {
+    return `${moment().unix().toString()}${currentName}${Math.random().toString(36).slice(2,7)}`;
+};
+
+
 
 
 
@@ -30,7 +41,16 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-router.post("/", [auth, upload.single('image'), validateWith(validationSchema), imageResize], async (req, res) => {
+router.post("/", [auth, upload.single('image'), validateWith(validationSchema)], async (req, res) => {
+    const randomFileKey = generateRandomFileKey(req.file.originalname);
+    const awsFileName = await generateUploadURL(randomFileKey);
+    const awsFileNameWithoutExtension = awsFileName.split("?")[0];
+
+    await awsClient.put(
+      `${randomFileKey}?${awsFileName.split('?')[1]}`,
+      req.file.buffer
+    );
+
     const newSpot = new SpotModel({
       userId: req.user.userId,
       name: req.body.name,
@@ -39,8 +59,7 @@ router.post("/", [auth, upload.single('image'), validateWith(validationSchema), 
         'latitude': parseFloat(parseFloat(req.body.latitude).toFixed(2)),
         'longitude': parseFloat(parseFloat(req.body.longitude).toFixed(2))
       },
-      // image: `http://10.0.0.86:9000/assets/${req.file.filename}.jpg`
-      image: `http://${ip.address()}:9000/assets/${req.file.filename}.jpg`
+      image: awsFileNameWithoutExtension
     });
     const spot = await SpotModel.create(newSpot);
     res.status(201).send(spot);
