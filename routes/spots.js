@@ -65,4 +65,16 @@ router.post("/", [auth, upload.single('image'), validateWith(validationSchema)],
     res.status(201).send(spot);
 });
 
+router.delete("/delete", auth, async (req, res) => {
+  try {
+      const spot = await SpotModel.findByIdAndDelete(req.query.id);
+      if (!spot) {
+          return res.status(404).send();
+      }
+      res.send(spot);
+  } catch (error) {
+      res.status(500).send(error);
+  }
+});
+
 module.exports = router;
