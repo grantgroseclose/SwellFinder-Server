@@ -32,13 +32,13 @@ const generateRandomFileKey = (currentName) => {
 
 
 router.get("/", auth, async (req, res) => {
-  try {
-      const data = await SpotModel.find({});
-      const filtered_spots = data.filter(spot => spot.userId === req.user.userId);
-      res.send(filtered_spots);
-  } catch (error) {
-      res.status(500).json({ error: "An unexpected error has occured fetching spots."});
-  }
+    try {
+        const data = await SpotModel.find({});
+        const filtered_spots = data.filter(spot => spot.userId === req.user.userId);
+        res.send(filtered_spots);
+    } catch (error) {
+        res.status(500).json({ error: "An unexpected error has occured fetching spots."});
+    }
 });
 
 router.post("/", [auth, upload.single('image'), validateWith(validationSchema)], async (req, res) => {
@@ -47,34 +47,34 @@ router.post("/", [auth, upload.single('image'), validateWith(validationSchema)],
     const awsFileNameWithoutExtension = awsFileName.split("?")[0];
 
     await awsClient.put(
-      `${randomFileKey}?${awsFileName.split('?')[1]}`,
-      req.file.buffer
+        `${randomFileKey}?${awsFileName.split('?')[1]}`,
+        req.file.buffer
     );
 
     const newSpot = new SpotModel({
-      userId: req.user.userId,
-      name: req.body.name,
-      description: req.body.description,
-      location: {
-        'latitude': parseFloat(parseFloat(req.body.latitude).toFixed(2)),
-        'longitude': parseFloat(parseFloat(req.body.longitude).toFixed(2))
-      },
-      image: awsFileNameWithoutExtension
+        userId: req.user.userId,
+        name: req.body.name,
+        description: req.body.description,
+        location: {
+          'latitude': parseFloat(parseFloat(req.body.latitude).toFixed(2)),
+          'longitude': parseFloat(parseFloat(req.body.longitude).toFixed(2))
+        },
+        image: awsFileNameWithoutExtension
     });
     const spot = await SpotModel.create(newSpot);
     res.status(201).send(spot);
 });
 
 router.delete("/delete", auth, async (req, res) => {
-  try {
-      const spot = await SpotModel.findByIdAndDelete(req.query.id);
-      if (!spot) {
-          return res.status(404).send();
-      }
-      res.send(spot);
-  } catch (error) {
-      res.status(500).send(error);
-  }
+    try {
+        const spot = await SpotModel.findByIdAndDelete(req.query.id);
+        if (!spot) {
+            return res.status(404).send();
+        }
+        res.send(spot);
+    } catch (error) {
+        res.status(500).send(error);
+    }
 });
 
 module.exports = router;

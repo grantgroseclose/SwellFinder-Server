@@ -46,8 +46,8 @@ const getSpot = (id) => spots.find((spot) => spot.id === id);
 const filterSpots = (predicate) => spots.filter(predicate);
 
 module.exports = {
-  addSpot,
-  getSpots,
-  getSpot,
-  filterSpots
+    addSpot,
+    getSpots,
+    getSpot,
+    filterSpots
 };
